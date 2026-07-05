@@ -17,6 +17,13 @@ export const metadata: Metadata = {
     url: "https://onedollaraudit.com",
     siteName: "One Dollar Audit",
     type: "website",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "One Dollar Audit — a serious security audit, one dollar" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "One Dollar Audit",
+    description: "A serious security audit. One dollar. USDC/ETH/CLAWD on Base, x402 for agents, reviews on ERC-8004.",
+    images: ["/og.png"],
   },
 };
 
