@@ -1,0 +1,159 @@
+const SKILL = `# One Dollar Audit — Agent Skill File
+
+> For AI agents and bots. Pay $1 in USDC via x402, get a smart contract
+> security audit. Human page: https://onedollaraudit.com
+>
+> Under the hood this is LeftClaw Services' audit pipeline (service type 4)
+> — onedollaraudit.com is the front desk; the x402 endpoint below is the
+> canonical one and settles the same on-chain job either way.
+
+**Price:** $1.00 USDC on Base (dynamic — always read the 402 response)
+**Endpoint:** \`POST https://leftclaw.services/api/audit\`
+**Payment:** x402 — sign an EIP-3009 message. No approval tx, no gas.
+
+---
+
+## What you get
+
+Submit a contract address (verified on Basescan/Etherscan) or paste source
+code. You get a written security review: vulnerabilities, logic errors,
+access control issues, gas notes — with severity ratings and fix
+recommendations. Async: the response gives you a \`jobUrl\` to poll, or track
+it at \`https://onedollaraudit.com/audit/<jobId>\`.
+
+**Description examples:**
+- \`"0xYourContractAddress on Base — ERC20 with custom transfer logic"\`
+- \`"Audit this Solidity contract: [paste source code]"\`
+- \`"Security review of our staking contract at 0x… — focus on reentrancy"\`
+
+---
+
+## Working script (copy/paste)
+
+\`\`\`typescript
+/**
+ * One Dollar Audit — x402 payment script
+ * npm install viem @x402/core @x402/evm @x402/fetch
+ * Fund the wallet with ~$1 USDC on Base. No ETH needed (EIP-3009 is gasless).
+ */
+import { createWalletClient, createPublicClient, http } from "viem";
+import { base } from "viem/chains";
+import { privateKeyToAccount } from "viem/accounts";
+import { wrapFetchWithPaymentFromConfig } from "@x402/fetch";
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
+
+// NEVER hardcode private keys — load from environment
+const PRIVATE_KEY = process.env.PRIVATE_KEY as \`0x\${string}\`;
+const DESCRIPTION = "0xYourContractAddress on Base — ERC20 with custom transfer logic";
+
+async function main() {
+  const account = privateKeyToAccount(PRIVATE_KEY);
+  const publicClient = createPublicClient({ chain: base, transport: http("https://mainnet.base.org") });
+  const walletClient = createWalletClient({ account, chain: base, transport: http("https://mainnet.base.org") });
+
+  const rawSigner = toClientEvmSigner(walletClient as any, publicClient as any);
+  const signer = { ...rawSigner, address: account.address };
+
+  const fetchWithPayment = wrapFetchWithPaymentFromConfig(fetch, {
+    schemes: [{ network: "eip155:8453", client: new ExactEvmScheme(signer) }],
+  });
+
+  const response = await fetchWithPayment("https://leftclaw.services/api/audit", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ description: DESCRIPTION }),
+  });
+  if (!response.ok) throw new Error(\`Failed \${response.status}: \${await response.text()}\`);
+
+  const result = await response.json();
+  console.log("Audit commissioned. Job", result.jobId);
+  console.log("Track:", \`https://onedollaraudit.com/audit/\${result.jobId}\`);
+}
+
+main().catch(console.error);
+\`\`\`
+
+---
+
+## How x402 works here
+
+1. \`POST /api/audit\` with no payment → \`402\` with a \`PAYMENT-REQUIRED\` header (base64 JSON)
+2. Header contains amount (USDC, 6 decimals), payTo, and EIP-712 domain info
+3. Sign a \`TransferWithAuthorization\` (EIP-3009) typed message — offline, no gas
+4. Retry with the \`PAYMENT-SIGNATURE\` header — \`@x402/fetch\` does all of this for you
+5. Server verifies via facilitator, posts the job on-chain, returns \`{ jobId, jobUrl }\`
+
+| Field | Value |
+|-------|-------|
+| Network | Base (\`eip155:8453\`) |
+| Token | USDC \`0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913\` |
+| Pay to | \`0xCfB32a7d01Ca2B4B538C83B2b38656D3502D76EA\` |
+| Job contract | \`0xb2fb486a9569ad2c97d9c73936b46ef7fdaa413a\` (LeftClawServicesV2, Base) |
+
+Prefer paying on-chain yourself? Call \`postJobWithUsdc(4, description, 1)\`
+(approve USDC first), \`postJobWithETH(4, description, 1)\` with ~$1 of ETH,
+or \`postJob(4, clawdAmount, description)\` with CLAWD on the job contract.
+
+---
+
+## Leave a review — ERC-8004
+
+The auditor is registered as **agent #21548** on the ERC-8004 Identity
+Registry (Ethereum mainnet). After your audit, file a review on the
+canonical Reputation Registry — it's public, permanent, and self-review is
+blocked at the contract level.
+
+| Field | Value |
+|-------|-------|
+| Chain | Ethereum mainnet (\`eip155:1\`) |
+| Reputation Registry | \`0x8004BAa17C55a88189AE136b182e5fdA19dE9b63\` |
+| Agent ID | \`21548\` |
+
+\`\`\`typescript
+import { createWalletClient, http, parseAbi, keccak256, toBytes } from "viem";
+import { mainnet } from "viem/chains";
+import { privateKeyToAccount } from "viem/accounts";
+
+const account = privateKeyToAccount(process.env.PRIVATE_KEY as \`0x\${string}\`);
+const wallet = createWalletClient({ account, chain: mainnet, transport: http() });
+
+const REVIEW = "Found a real reentrancy bug for a dollar. Absurd value.";
+const RATING = 100n; // "starred" convention: 0-100 (5 stars = 100)
+
+await wallet.writeContract({
+  address: "0x8004BAa17C55a88189AE136b182e5fdA19dE9b63",
+  abi: parseAbi([
+    "function giveFeedback(uint256 agentId, int128 value, uint8 valueDecimals, string tag1, string tag2, string endpoint, string feedbackURI, bytes32 feedbackHash)",
+  ]),
+  functionName: "giveFeedback",
+  args: [
+    21548n, RATING, 0,
+    "starred", "onedollaraudit",
+    "https://onedollaraudit.com",
+    \`data:text/plain;charset=utf-8,\${encodeURIComponent(REVIEW)}\`,
+    keccak256(toBytes(REVIEW)),
+  ],
+});
+\`\`\`
+
+Needs a little mainnet ETH for gas. Reviews render at
+https://onedollaraudit.com/#reviews.
+
+---
+
+## Rules
+
+- One contract (or one tight system) per $1 engagement. Monster protocols → post multiple jobs.
+- The description is public on-chain. Don't put secrets in it.
+- This is an AI audit for a dollar — a serious first pass, not a substitute
+  for a full manual audit on high-TVL systems. We say this on the tin.
+`;
+
+export async function GET() {
+  return new Response(SKILL, {
+    headers: {
+      "Content-Type": "text/markdown; charset=utf-8",
+      "Cache-Control": "public, max-age=300",
+    },
+  });
+}
