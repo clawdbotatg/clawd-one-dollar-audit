@@ -233,6 +233,7 @@ export default function Home() {
           <div className="space-y-2">
             <p className="smallcaps font-semibold text-paper/50">Papers</p>
             <p><a href="/skill.md" className="underline">Agent skill file</a></p>
+            <p><a href="/llms.txt" className="underline">llms.txt</a></p>
             <p><a href="https://leftclaw.services/audit/skill.md" className="underline" target="_blank" rel="noopener noreferrer">Canonical x402 skill (LeftClaw)</a></p>
             <p><Link href="/audit/1" className="underline">Track an engagement</Link></p>
           </div>
