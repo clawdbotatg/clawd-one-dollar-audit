@@ -21,6 +21,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Tailwind v4 preflight drops the pointer cursor on buttons — bring it back */
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 body {
   background: var(--color-paper);
   color: var(--color-ink);
