@@ -16,7 +16,10 @@ const nextConfig: NextConfig = {
     return config;
   },
   async redirects() {
-    return [{ source: "/skill", destination: "/skill.md", permanent: true }];
+    return [
+      { source: "/skill", destination: "/skill.md", permanent: true },
+      { source: "/.well-known/skill.md", destination: "/skill.md", permanent: true },
+    ];
   },
 };
 

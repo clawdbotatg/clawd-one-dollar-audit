@@ -18,8 +18,9 @@ const SKILL = `# One Dollar Audit — Agent Skill File
 Submit a contract address (verified on Basescan/Etherscan) or paste source
 code. You get a written security review: vulnerabilities, logic errors,
 access control issues, gas notes — with severity ratings and fix
-recommendations. Async: the response gives you a \`jobUrl\` to poll, or track
-it at \`https://onedollaraudit.com/audit/<jobId>\`.
+recommendations. Async: the response gives you a \`jobId\`; poll
+\`GET https://onedollaraudit.com/api/jobs/<jobId>\` (JSON) until
+\`status: "complete"\` — see **Retrieve the report** below.
 
 **Description examples:**
 - \`"0xYourContractAddress on Base — ERC20 with custom transfer logic"\`
@@ -67,11 +68,51 @@ async function main() {
 
   const result = await response.json();
   console.log("Audit commissioned. Job", result.jobId);
-  console.log("Track:", \`https://onedollaraudit.com/audit/\${result.jobId}\`);
+
+  // Poll the JSON job API until the report lands (most within the hour)
+  for (;;) {
+    const job = await (await fetch(\`https://onedollaraudit.com/api/jobs/\${result.jobId}\`)).json();
+    if (job.status === "complete") { console.log("Report:", job.reportUrl ?? job.report); break; }
+    if (job.status === "declined" || job.status === "cancelled") throw new Error(\`Job \${job.status}\`);
+    await new Promise(r => setTimeout(r, (job.pollIntervalSeconds ?? 30) * 1000));
+  }
 }
 
 main().catch(console.error);
 \`\`\`
+
+---
+
+## Retrieve the report
+
+\`GET https://onedollaraudit.com/api/jobs/<jobId>\` — no auth, JSON, reads the
+job live from the on-chain contract:
+
+\`\`\`json
+{
+  "jobId": 295,
+  "status": "in_progress",
+  "stage": "Reviewing access control",
+  "description": "0x… on Base — ERC20 with custom transfer logic",
+  "createdAt": "2026-07-05T17:20:11.000Z",
+  "startedAt": "2026-07-05T17:24:02.000Z",
+  "completedAt": null,
+  "report": null,
+  "reportUrl": null,
+  "estimatedCompletionSeconds": 2400,
+  "pollIntervalSeconds": 30,
+  "trackUrl": "https://onedollaraudit.com/audit/295"
+}
+\`\`\`
+
+\`status\` is one of \`pending | in_progress | complete | declined | cancelled |
+reassigned\`. When \`complete\`, \`reportUrl\` links the delivered report. A 404
+with \`{"error": "not_found"}\` right after paying just means the block hasn't
+landed — honor the \`Retry-After\` header and retry.
+
+The same JSON is served by \`https://onedollaraudit.com/audit/<jobId>\` when you
+send \`Accept: application/json\` (the human page otherwise). Also mirrored at
+\`https://onedollaraudit.com/.well-known/skill.md\` → this file.
 
 ---
 
@@ -82,6 +123,13 @@ main().catch(console.error);
 3. Sign a \`TransferWithAuthorization\` (EIP-3009) typed message — offline, no gas
 4. Retry with the \`PAYMENT-SIGNATURE\` header — \`@x402/fetch\` does all of this for you
 5. Server verifies via facilitator, posts the job on-chain, returns \`{ jobId, jobUrl }\`
+
+**Exact header names:** the 402 carries \`PAYMENT-REQUIRED\` (response) and you
+pay with \`PAYMENT-SIGNATURE\` (request). These are the x402 v2 names — older v1
+clients expecting \`X-PAYMENT\` / \`X-PAYMENT-RESPONSE\` won't interoperate. If a
+402 comes back with an empty JSON body (e.g. wallet not funded yet), the reason
+lives inside the base64-decoded \`PAYMENT-REQUIRED\` header — decode it before
+concluding the protocol is broken.
 
 | Field | Value |
 |-------|-------|

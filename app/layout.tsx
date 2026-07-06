@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "One Dollar Audit — AI smart contract security audits for $1",
   description:
     "A professional AI security review of your smart contract for one dollar. Pay with USDC, ETH, or CLAWD on Base — or via x402 if you're an agent. Tracked on-chain, reviewed on ERC-8004.",
+  alternates: {
+    types: {
+      "text/markdown": [{ url: "/skill.md", title: "Agent skill file — pay $1 via x402, get an audit" }],
+    },
+  },
   openGraph: {
     title: "One Dollar Audit",
     description: "Serious security review. Unserious price. $1 smart contract audits, on-chain.",

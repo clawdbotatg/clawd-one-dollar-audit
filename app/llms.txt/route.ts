@@ -18,8 +18,12 @@ TransferWithAuthorization and retry. You get back { jobId, jobUrl }.
   paid endpoint. Body: { "description": "contract address or source" }
 - [Service catalog](https://leftclaw.services/api/services): GET — live prices
   for this and other LeftClaw services
+- [Job status JSON](https://onedollaraudit.com/api/jobs/JOBID): GET — machine-
+  readable job state (status, stage, reportUrl, poll guidance) straight from
+  the chain. No auth.
 - [Track an engagement](https://onedollaraudit.com/audit/JOBID): live on-chain
-  job status, stage, and report link
+  job status, stage, and report link (same data as the JSON endpoint; also
+  serves the JSON when requested with Accept: application/json)
 
 ## On-chain
 
