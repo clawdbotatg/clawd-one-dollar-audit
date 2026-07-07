@@ -19,6 +19,15 @@ async function fetchPrice(token: string): Promise<number | null> {
   }
 }
 
+/** Force-refresh both quotes, e.g. at submit time so a long-idle tab doesn't
+ * pay against a stale price. Falls back to the cached value per-token if a
+ * fetch fails, so a DexScreener blip degrades to the old behavior. */
+export async function refreshPrices(): Promise<{ clawd: number | null; eth: number | null }> {
+  const [clawd, eth] = await Promise.all([fetchPrice(CLAWD_ADDRESS), fetchPrice(WETH_BASE)]);
+  cache = { clawd: clawd ?? cache.clawd, eth: eth ?? cache.eth, at: Date.now() };
+  return { clawd: cache.clawd, eth: cache.eth };
+}
+
 /** Live CLAWD + ETH USD prices from DexScreener (same source leftclaw.services uses). */
 export function usePrices() {
   const [clawdPrice, setClawdPrice] = useState<number | null>(cache.clawd);
@@ -30,8 +39,7 @@ export function usePrices() {
       setEthPrice(cache.eth);
       return;
     }
-    Promise.all([fetchPrice(CLAWD_ADDRESS), fetchPrice(WETH_BASE)]).then(([clawd, eth]) => {
-      cache = { clawd, eth, at: Date.now() };
+    refreshPrices().then(({ clawd, eth }) => {
       if (clawd) setClawdPrice(clawd);
       if (eth) setEthPrice(eth);
     });

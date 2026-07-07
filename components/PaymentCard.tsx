@@ -14,7 +14,7 @@ import {
   LEFTCLAW_ADDRESS,
   USDC_ADDRESS,
 } from "@/lib/contracts";
-import { usePrices } from "@/lib/prices";
+import { refreshPrices, usePrices } from "@/lib/prices";
 
 type Method = "usdc" | "eth" | "clawd";
 type Step = "idle" | "approving" | "posting" | "done";
@@ -72,12 +72,6 @@ export function PaymentCard() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
-  // The contract swaps USDC/ETH → CLAWD on-chain; bound the swap at 5% below
-  // the DexScreener quote (1 wei fallback keeps payments working if the feed is down).
-  const minClawdOut = clawdPrice
-    ? parseUnits(((priceUsd / clawdPrice) * 0.95).toFixed(18), 18)
-    : 1n;
-
   const costDisplay =
     method === "usdc"
       ? `$${priceUsd.toFixed(2)} USDC`
@@ -121,6 +115,15 @@ export function PaymentCard() {
       const svcId = BigInt(AUDIT_SERVICE_TYPE_ID);
       let txHash: `0x${string}`;
 
+      // Re-quote at pay time — the mount-time quote can be minutes stale, which
+      // would trip the slippage bound or misprice the ETH/CLAWD amounts.
+      const live = await refreshPrices();
+      // The contract swaps USDC/ETH → CLAWD on-chain; bound the swap at 5% below
+      // the quote (1 wei fallback keeps payments working if the feed is down).
+      const minClawdOut = live.clawd
+        ? parseUnits(((priceUsd / live.clawd) * 0.95).toFixed(18), 18)
+        : 1n;
+
       if (method === "usdc") {
         await approveAndWait(USDC_ADDRESS, usdcAmount);
         setStep("posting");
@@ -129,21 +132,22 @@ export function PaymentCard() {
           functionName: "postJobWithUsdc", args: [svcId, desc, minClawdOut],
         });
       } else if (method === "eth") {
-        if (!ethPrice || ethNeeded <= 0) throw new Error("ETH price not loaded yet — try again in a moment");
+        if (!live.eth) throw new Error("ETH price not loaded yet — try again in a moment");
         setStep("posting");
         // 5% buffer — the contract swaps ETH → CLAWD and needs the USD price covered
-        const ethWei = parseEther((ethNeeded * 1.05).toFixed(18));
+        const ethWei = parseEther(((priceUsd / live.eth) * 1.05).toFixed(18));
         txHash = await writeContractAsync({
           chainId: BASE_CHAIN_ID, address: LEFTCLAW_ADDRESS, abi: LEFTCLAW_ABI,
           functionName: "postJobWithETH", args: [svcId, desc, minClawdOut], value: ethWei,
         });
       } else {
-        if (!clawdPrice || clawdWei <= 0n) throw new Error("CLAWD price not loaded yet — try again in a moment");
-        await approveAndWait(CLAWD_ADDRESS, clawdWei);
+        if (!live.clawd) throw new Error("CLAWD price not loaded yet — try again in a moment");
+        const liveClawdWei = BigInt(Math.ceil(priceUsd / live.clawd)) * 10n ** 18n;
+        await approveAndWait(CLAWD_ADDRESS, liveClawdWei);
         setStep("posting");
         txHash = await writeContractAsync({
           chainId: BASE_CHAIN_ID, address: LEFTCLAW_ADDRESS, abi: LEFTCLAW_ABI,
-          functionName: "postJob", args: [svcId, clawdWei, desc],
+          functionName: "postJob", args: [svcId, liveClawdWei, desc],
         });
       }
 
