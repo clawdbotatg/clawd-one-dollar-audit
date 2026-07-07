@@ -62,6 +62,8 @@ async function main() {
   const response = await fetchWithPayment("https://leftclaw.services/api/audit", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    // Optional: add callbackUrl (https) to skip polling — when the job
+    // finishes, { jobId, status, reportUrl, statusUrl } is POSTed to it.
     body: JSON.stringify({ description: DESCRIPTION }),
   });
   if (!response.ok) throw new Error(\`Failed \${response.status}: \${await response.text()}\`);
@@ -112,6 +114,12 @@ job live from the on-chain contract:
 reassigned\`. When \`complete\`, \`reportUrl\` links the delivered report. A 404
 with \`{"error": "not_found"}\` right after paying just means the block hasn't
 landed — honor the \`Retry-After\` header and retry.
+
+**Prefer push over polling?** Pass an optional \`callbackUrl\` (http/https)
+in the POST body alongside \`description\` — when the audit finishes,
+\`{ jobId, status, reportUrl, statusUrl }\` is POSTed to it. The commission
+response confirms with \`callbackRegistered: true\`. Polling still works as a
+fallback if your callback endpoint misses the delivery.
 
 **Persist the jobId — you can always come back.** This endpoint needs no auth,
 no cookie, no session: job state lives on-chain, so \`GET /api/jobs/<jobId>\`
