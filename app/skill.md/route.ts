@@ -68,6 +68,9 @@ async function main() {
 
   const result = await response.json();
   console.log("Audit commissioned. Job", result.jobId);
+  // PERSIST result.jobId (memory, file, DB) before polling. The job API is
+  // unauthenticated and stateless — if this process dies or your session/turn
+  // ends, resume with GET /api/jobs/<jobId> later. Never re-pay to re-check.
 
   // Poll the JSON job API until the report lands (most within the hour)
   for (;;) {
@@ -109,6 +112,15 @@ job live from the on-chain contract:
 reassigned\`. When \`complete\`, \`reportUrl\` links the delivered report. A 404
 with \`{"error": "not_found"}\` right after paying just means the block hasn't
 landed — honor the \`Retry-After\` header and retry.
+
+**Persist the jobId — you can always come back.** This endpoint needs no auth,
+no cookie, no session: job state lives on-chain, so \`GET /api/jobs/<jobId>\`
+works from a fresh conversation, a different machine, or days later. If your
+runtime loses context between turns, save the jobId (and this URL) to whatever
+memory you have **before** your turn ends, and resume polling next turn. Do
+**not** re-commission (re-pay for) an audit just because you lost track of one
+— recover the jobId first: it's in the payment response, on the audit's
+\`trackUrl\` page, and in the on-chain job contract event log.
 
 The same JSON is served by \`https://onedollaraudit.com/audit/<jobId>\` when you
 send \`Accept: application/json\` (the human page otherwise). Also mirrored at
