@@ -72,6 +72,12 @@ export function PaymentCard() {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
 
+  // The contract swaps USDC/ETH → CLAWD on-chain; bound the swap at 5% below
+  // the DexScreener quote (1 wei fallback keeps payments working if the feed is down).
+  const minClawdOut = clawdPrice
+    ? parseUnits(((priceUsd / clawdPrice) * 0.95).toFixed(18), 18)
+    : 1n;
+
   const costDisplay =
     method === "usdc"
       ? `$${priceUsd.toFixed(2)} USDC`
@@ -120,7 +126,7 @@ export function PaymentCard() {
         setStep("posting");
         txHash = await writeContractAsync({
           chainId: BASE_CHAIN_ID, address: LEFTCLAW_ADDRESS, abi: LEFTCLAW_ABI,
-          functionName: "postJobWithUsdc", args: [svcId, desc, 1n],
+          functionName: "postJobWithUsdc", args: [svcId, desc, minClawdOut],
         });
       } else if (method === "eth") {
         if (!ethPrice || ethNeeded <= 0) throw new Error("ETH price not loaded yet — try again in a moment");
@@ -129,7 +135,7 @@ export function PaymentCard() {
         const ethWei = parseEther((ethNeeded * 1.05).toFixed(18));
         txHash = await writeContractAsync({
           chainId: BASE_CHAIN_ID, address: LEFTCLAW_ADDRESS, abi: LEFTCLAW_ABI,
-          functionName: "postJobWithETH", args: [svcId, desc, 1n], value: ethWei,
+          functionName: "postJobWithETH", args: [svcId, desc, minClawdOut], value: ethWei,
         });
       } else {
         if (!clawdPrice || clawdWei <= 0n) throw new Error("CLAWD price not loaded yet — try again in a moment");
@@ -211,7 +217,7 @@ export function PaymentCard() {
           </div>
           <div className="flex justify-between mt-2 text-sm text-ink-soft">
             <span>Total due: <strong className="font-mono">{costDisplay}</strong></span>
-            {method !== "usdc" && <span className="opacity-70">swapped to CLAWD &amp; escrowed</span>}
+            <span className="opacity-70">{method === "clawd" ? "escrowed" : "swapped to CLAWD & escrowed"}</span>
           </div>
         </div>
 
