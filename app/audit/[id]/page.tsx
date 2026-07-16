@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { useReadContract } from "wagmi";
 import {
   BASE_CHAIN_ID,
@@ -34,6 +34,23 @@ export default function AuditTracker({ params }: { params: Promise<{ id: string 
   const status = job ? JOB_STATUS[job.status] ?? "Unknown" : null;
   const completed = job?.status === 2;
   const link = job ? resultLink(job.resultCID) : null;
+
+  // Pretty HTML version of the report on leftclaw.services — newer audits
+  // only, so probe before rendering the link (older jobs 404 there).
+  const [prettyLink, setPrettyLink] = useState<string | null>(null);
+  useEffect(() => {
+    if (!completed) return;
+    const url = `${LEFTCLAW_APP}/result/${id}.html`;
+    let alive = true;
+    fetch(url, { method: "HEAD" })
+      .then((res) => {
+        if (alive && res.ok) setPrettyLink(url);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [completed, id]);
 
   return (
     <main className="min-h-screen max-w-3xl mx-auto px-6 py-12">
@@ -92,14 +109,28 @@ export default function AuditTracker({ params }: { params: Promise<{ id: string 
               {completed && (
                 <div className="border border-mint/40 bg-mint/5 px-5 py-4 space-y-2">
                   <p className="smallcaps font-bold text-mint">Report delivered</p>
+                  {prettyLink && (
+                    <a
+                      href={prettyLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block underline font-semibold break-all"
+                    >
+                      Read your audit report →
+                    </a>
+                  )}
                   {link ? (
                     <a
                       href={link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-block underline font-semibold break-all"
+                      className={
+                        prettyLink
+                          ? "block underline text-sm text-ink-soft break-all"
+                          : "inline-block underline font-semibold break-all"
+                      }
                     >
-                      Read your audit report →
+                      {prettyLink ? "Raw report (IPFS) →" : "Read your audit report →"}
                     </a>
                   ) : (
                     job.resultCID && <p className="font-mono text-sm break-all">{job.resultCID}</p>

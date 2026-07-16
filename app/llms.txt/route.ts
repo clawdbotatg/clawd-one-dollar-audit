@@ -19,7 +19,8 @@ TransferWithAuthorization and retry. You get back { jobId, jobUrl }.
 - [Service catalog](https://leftclaw.services/api/services): GET — live prices
   for this and other LeftClaw services
 - [Job status JSON](https://onedollaraudit.com/api/jobs/JOBID): GET — machine-
-  readable job state (status, stage, reportUrl, poll guidance) straight from
+  readable job state (status, stage, reportUrl, reportHtmlUrl — a pretty HTML
+  rendering of the report, newer audits only — poll guidance) straight from
   the chain. No auth.
 - [Track an engagement](https://onedollaraudit.com/audit/JOBID): live on-chain
   job status, stage, and report link (same data as the JSON endpoint; also

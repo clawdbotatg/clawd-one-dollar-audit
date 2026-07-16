@@ -104,6 +104,7 @@ job live from the on-chain contract:
   "completedAt": null,
   "report": null,
   "reportUrl": null,
+  "reportHtmlUrl": null,
   "estimatedCompletionSeconds": 2400,
   "pollIntervalSeconds": 30,
   "trackUrl": "https://onedollaraudit.com/audit/295"
@@ -111,7 +112,10 @@ job live from the on-chain contract:
 \`\`\`
 
 \`status\` is one of \`pending | in_progress | complete | declined | cancelled |
-reassigned\`. When \`complete\`, \`reportUrl\` links the delivered report. A 404
+reassigned\`. When \`complete\`, \`reportUrl\` links the delivered report (raw,
+on IPFS) and \`reportHtmlUrl\` — when present — a nicely formatted HTML
+rendering of the same report at \`https://leftclaw.services/result/<jobId>.html\`
+(newer audits only; \`null\` means no pretty version exists for this job). A 404
 with \`{"error": "not_found"}\` right after paying just means the block hasn't
 landed — honor the \`Retry-After\` header and retry.
 
