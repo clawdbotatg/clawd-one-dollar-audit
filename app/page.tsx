@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ConnectButton } from "@/components/ConnectButton";
 import { CopyBlock } from "@/components/CopyBlock";
+import { MyAudits } from "@/components/MyAudits";
 import { PaymentCard } from "@/components/PaymentCard";
 import { Reviews } from "@/components/Reviews";
 import {
@@ -90,6 +91,9 @@ export default function Home() {
           <span>⭐ Reviews on <strong>ERC-8004</strong>, Ethereum mainnet</span>
         </div>
       </div>
+
+      {/* Your engagements — renders nothing for a fresh visitor */}
+      <MyAudits />
 
       {/* Process */}
       <section className="max-w-6xl mx-auto px-6 py-20">

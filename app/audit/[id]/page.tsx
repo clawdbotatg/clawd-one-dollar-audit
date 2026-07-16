@@ -10,6 +10,7 @@ import {
   LEFTCLAW_ADDRESS,
   LEFTCLAW_APP,
 } from "@/lib/contracts";
+import { rememberAudit } from "@/lib/myAudits";
 
 function resultLink(cid: string): string | null {
   if (!cid) return null;
@@ -34,6 +35,15 @@ export default function AuditTracker({ params }: { params: Promise<{ id: string 
   const status = job ? JOB_STATUS[job.status] ?? "Unknown" : null;
   const completed = job?.status === 2;
   const link = job ? resultLink(job.resultCID) : null;
+
+  // Any real job you open gets remembered in this browser's "Your engagements"
+  // list on the homepage — covers agent-commissioned audits too, since their
+  // humans land here via the trackUrl.
+  useEffect(() => {
+    if (job && job.createdAt > 0n && jobId !== null) {
+      rememberAudit(Number(jobId), job.description);
+    }
+  }, [job, jobId]);
 
   // Pretty HTML version of the report on leftclaw.services — newer audits
   // only, so probe before rendering the link (older jobs 404 there).

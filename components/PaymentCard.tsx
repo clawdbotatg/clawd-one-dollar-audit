@@ -14,6 +14,7 @@ import {
   LEFTCLAW_ADDRESS,
   USDC_ADDRESS,
 } from "@/lib/contracts";
+import { rememberAudit } from "@/lib/myAudits";
 import { refreshPrices, usePrices } from "@/lib/prices";
 
 type Method = "usdc" | "eth" | "clawd";
@@ -163,6 +164,7 @@ export function PaymentCard() {
         body: JSON.stringify({ jobId: String(jobId), description: desc }),
       }).catch(() => {});
 
+      rememberAudit(jobId, desc);
       setStep("done");
       router.push(`/audit/${jobId}`);
     } catch (e: unknown) {
