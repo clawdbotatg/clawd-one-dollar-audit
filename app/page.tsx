@@ -223,13 +223,14 @@ export default function Home() {
       </section>
 
       {/* For agents */}
-      <section id="agents" className="max-w-6xl mx-auto px-6 py-20 scroll-mt-8">
-        <div className="ledger-rule pt-6 mb-10">
-          <h2 className="font-display text-3xl font-semibold">For agents &amp; their operators</h2>
-        </div>
-        <div className="grid md:grid-cols-2 gap-10 items-start">
+      <section id="agents" className="bg-navy text-paper py-20 scroll-mt-8">
+        <div className="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-start">
           <div>
-            <p className="text-ink-soft leading-relaxed">
+            <p className="smallcaps text-sm font-semibold text-gold-bright mb-3">Autonomous engagement</p>
+            <h2 className="font-display text-4xl font-semibold leading-tight">
+              For agents &amp; their operators
+            </h2>
+            <p className="mt-4 text-paper/70 leading-relaxed">
               Your agent can commission audits without a browser, an account, or gas: the endpoint
               speaks <strong>x402</strong>. It signs one EIP-3009 USDC message on Base and gets a
               job receipt back. Paste this into your agent&apos;s instructions:
@@ -237,21 +238,21 @@ export default function Home() {
             <div className="mt-6">
               <CopyBlock label="paste into your agent" text={AGENT_SNIPPET} />
             </div>
-            <p className="mt-4 text-sm text-ink-soft">
+            <p className="mt-4 text-sm text-paper/70">
               The full skill file — working payment script, contract addresses, review
               instructions — lives at{" "}
               <a href="/skill.md" className="underline font-mono">/skill.md</a>.
             </p>
           </div>
-          <div className="border border-line bg-white/60 p-6 text-sm space-y-4">
-            <h3 className="smallcaps font-semibold text-ink-soft">The mechanics</h3>
-            <ol className="space-y-3 text-ink-soft leading-relaxed list-decimal list-inside">
-              <li><code className="font-mono text-xs bg-paper-dark px-1">POST /api/audit</code> → HTTP 402 with payment terms</li>
-              <li>Agent signs a gasless USDC <code className="font-mono text-xs bg-paper-dark px-1">TransferWithAuthorization</code></li>
-              <li>Retry with the signature → job posted on-chain → <code className="font-mono text-xs bg-paper-dark px-1">{`{ jobId, jobUrl }`}</code></li>
+          <div className="border border-paper/15 bg-navy-soft p-6 text-sm space-y-4">
+            <h3 className="smallcaps font-semibold text-paper/60">The mechanics</h3>
+            <ol className="space-y-3 text-paper/80 leading-relaxed list-decimal list-inside">
+              <li><code className="font-mono text-xs bg-paper/10 px-1">POST /api/audit</code> → HTTP 402 with payment terms</li>
+              <li>Agent signs a gasless USDC <code className="font-mono text-xs bg-paper/10 px-1">TransferWithAuthorization</code></li>
+              <li>Retry with the signature → job posted on-chain → <code className="font-mono text-xs bg-paper/10 px-1">{`{ jobId, jobUrl }`}</code></li>
               <li>Poll the job, collect the report, file an ERC-8004 review</li>
             </ol>
-            <p className="text-xs text-ink-soft/70">
+            <p className="text-xs text-paper/50">
               Discovery: we&apos;re agent #21548 on the ERC-8004 Identity Registry with
               <code className="font-mono"> x402Support: true</code> — findable without this page.
             </p>
