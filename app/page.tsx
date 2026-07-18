@@ -45,6 +45,7 @@ export default function Home() {
         <span className="font-display text-lg font-semibold tracking-tight">One Dollar Audit</span>
         <nav className="flex items-center gap-6 text-sm">
           <a href="#engage" className="smallcaps hover:text-gold transition-colors hidden sm:inline">Engage</a>
+          <a href="#stake" className="smallcaps hover:text-gold transition-colors hidden sm:inline">Stake</a>
           <a href="#agents" className="smallcaps hover:text-gold transition-colors hidden sm:inline">For Agents</a>
           <a href="#reviews" className="smallcaps hover:text-gold transition-colors hidden sm:inline">Reviews</a>
           <ConnectButton />
@@ -167,6 +168,60 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Staking */}
+      <section id="stake" className="max-w-6xl mx-auto px-6 py-20 scroll-mt-8">
+        <div className="ledger-rule pt-6 mb-10">
+          <h2 className="font-display text-3xl font-semibold">The retainer — free audits for stakers</h2>
+        </div>
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+          <div>
+            <p className="text-ink-soft leading-relaxed">
+              Prefer not to pay per engagement? Keep the firm on retainer. Stake{" "}
+              <strong>CLAWD</strong> at{" "}
+              <a
+                href="https://stake.onedollaraudit.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline font-mono"
+              >
+                stake.onedollaraudit.com
+              </a>{" "}
+              and accrue <strong>conviction</strong> — stake × time, earned every second your
+              tokens sit in the vault. Spend conviction to commission audits without paying a
+              dollar. Same auditors, same written reports, same on-chain record.
+            </p>
+            <ul className="mt-6 space-y-3 text-sm text-ink-soft">
+              <li>▸ Minimum stake: 1,000 CLAWD, on Base</li>
+              <li>▸ 1 CLAWD staked for twenty days earns one conviction point</li>
+              <li>▸ Withdraw anytime — conviction is banked, never lost</li>
+              <li>▸ No lock-ups, no penalties, no dollars</li>
+            </ul>
+            <div className="mt-8">
+              <a
+                href="https://stake.onedollaraudit.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="smallcaps text-base font-semibold px-8 py-4 bg-ink text-paper hover:bg-navy transition-colors inline-block"
+              >
+                Stake for free audits →
+              </a>
+            </div>
+          </div>
+          <div className="border border-line bg-white/60 p-6 text-sm space-y-4">
+            <h3 className="smallcaps font-semibold text-ink-soft">How the retainer works</h3>
+            <ol className="space-y-3 text-ink-soft leading-relaxed list-decimal list-inside">
+              <li>Deposit CLAWD into the staking vault on Base</li>
+              <li>Conviction accrues automatically — stake × time</li>
+              <li>Spend conviction to commission an audit, free of charge</li>
+              <li>Withdraw your stake whenever you like; banked conviction stays yours</li>
+            </ol>
+            <p className="text-xs text-ink-soft/70 font-mono break-all">
+              Vault (Base): 0xC9E377FB98a1aA6Ecf4B553cE1b57940121213bf
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* For agents */}
       <section id="agents" className="max-w-6xl mx-auto px-6 py-20 scroll-mt-8">
         <div className="ledger-rule pt-6 mb-10">
@@ -240,6 +295,7 @@ export default function Home() {
             <p><a href="/llms.txt" className="underline">llms.txt</a></p>
             <p><a href="https://leftclaw.services/audit/skill.md" className="underline" target="_blank" rel="noopener noreferrer">Canonical x402 skill (LeftClaw)</a></p>
             <p><Link href="/audit/1" className="underline">Track an engagement</Link></p>
+            <p><a href="https://stake.onedollaraudit.com" className="underline" target="_blank" rel="noopener noreferrer">Stake for free audits</a></p>
           </div>
         </div>
         <div className="max-w-6xl mx-auto px-6 mt-10 pt-6 border-t border-paper/10 text-xs text-paper/40">
