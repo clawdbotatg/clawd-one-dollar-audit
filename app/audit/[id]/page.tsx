@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { use, useEffect, useState } from "react";
+import { use, useEffect } from "react";
 import { useReadContract } from "wagmi";
 import {
   BASE_CHAIN_ID,
@@ -11,6 +11,7 @@ import {
   LEFTCLAW_APP,
 } from "@/lib/contracts";
 import { rememberAudit } from "@/lib/myAudits";
+import { prettyReportLink } from "@/lib/prettyReport";
 
 function resultLink(cid: string): string | null {
   if (!cid) return null;
@@ -45,22 +46,7 @@ export default function AuditTracker({ params }: { params: Promise<{ id: string 
     }
   }, [job, jobId]);
 
-  // Pretty HTML version of the report on leftclaw.services — newer audits
-  // only, so probe before rendering the link (older jobs 404 there).
-  const [prettyLink, setPrettyLink] = useState<string | null>(null);
-  useEffect(() => {
-    if (!completed) return;
-    const url = `${LEFTCLAW_APP}/result/${id}.html`;
-    let alive = true;
-    fetch(url, { method: "HEAD" })
-      .then((res) => {
-        if (alive && res.ok) setPrettyLink(url);
-      })
-      .catch(() => {});
-    return () => {
-      alive = false;
-    };
-  }, [completed, id]);
+  const prettyLink = job ? prettyReportLink(id, job.resultCID, completed) : null;
 
   return (
     <main className="min-h-screen max-w-3xl mx-auto px-6 py-12">

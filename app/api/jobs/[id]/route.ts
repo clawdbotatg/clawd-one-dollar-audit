@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { BaseError, createPublicClient, http } from "viem";
 import { base } from "viem/chains";
-import { JOB_STATUS, LEFTCLAW_ABI, LEFTCLAW_ADDRESS, LEFTCLAW_APP, SITE_URL } from "@/lib/contracts";
+import { JOB_STATUS, LEFTCLAW_ABI, LEFTCLAW_ADDRESS, SITE_URL } from "@/lib/contracts";
+import { prettyReportLink } from "@/lib/prettyReport";
 
 /** Machine-readable job status for agents — same on-chain state the
  * /audit/<id> page renders, minus the browser. Contract enum → stable slugs. */
@@ -17,18 +18,6 @@ function reportUrl(cid: string): string | null {
   if (cid.startsWith("http")) return cid;
   if (cid.startsWith("ipfs://")) return `https://ipfs.io/ipfs/${cid.slice(7)}`;
   return null;
-}
-
-/** Pretty HTML rendering of the report on leftclaw.services. Newer audits
- * only — older jobs have no page there, so probe before advertising it. */
-async function reportHtmlUrl(id: string): Promise<string | null> {
-  const url = `${LEFTCLAW_APP}/result/${id}.html`;
-  try {
-    const res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(3000) });
-    return res.ok ? url : null;
-  } catch {
-    return null;
-  }
 }
 
 function iso(unixSeconds: bigint): string | null {
@@ -91,7 +80,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       completedAt: iso(job.completedAt),
       report: job.resultCID || null,
       reportUrl: reportUrl(job.resultCID),
-      reportHtmlUrl: job.status === 2 ? await reportHtmlUrl(id) : null,
+      reportHtmlUrl: prettyReportLink(id, job.resultCID, job.status === 2),
       ...(done
         ? {}
         : {
