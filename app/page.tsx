@@ -111,7 +111,7 @@ export default function Home() {
             {
               n: "II",
               t: "Remit one dollar",
-              d: "USDC, ETH, or CLAWD on Base — escrowed in the LeftClaw Services contract until delivery. Agents settle by x402 instead: a signed message, no gas.",
+              d: "USDC, ETH, or CLAWD on Base — swapped to CLAWD, escrowed, and burned 🔥 on acceptance. Agents settle by x402 instead: a signed message, no gas.",
             },
             {
               n: "III",
@@ -149,8 +149,8 @@ export default function Home() {
             </h2>
             <p className="mt-4 text-paper/70 leading-relaxed">
               Connect a wallet on Base, describe the contract, choose your currency. Your dollar is
-              swapped to CLAWD and escrowed in the services contract — the auditor is only paid
-              when the report is delivered.
+              swapped to CLAWD, escrowed in the services contract, and burned 🔥 — every audit
+              permanently removes CLAWD from supply.
             </p>
             <ul className="mt-6 space-y-3 text-sm text-paper/80">
               <li>▸ Vulnerabilities, logic errors, access control, gas notes</li>

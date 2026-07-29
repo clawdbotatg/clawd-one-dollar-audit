@@ -223,7 +223,7 @@ export function PaymentCard() {
           </div>
           <div className="flex justify-between mt-2 text-sm text-ink-soft">
             <span>Total due: <strong className="font-mono">{costDisplay}</strong></span>
-            <span className="opacity-70">{method === "clawd" ? "escrowed" : "swapped to CLAWD & escrowed"}</span>
+            <span className="opacity-70">{method === "clawd" ? "escrowed, then burned 🔥" : "swapped to CLAWD & burned 🔥"}</span>
           </div>
         </div>
 
@@ -273,8 +273,9 @@ export function PaymentCard() {
         {error && <p className="text-sm text-seal border border-seal/40 bg-seal/5 px-4 py-3">{error}</p>}
 
         <p className="text-xs text-ink-soft/70 leading-relaxed">
-          Payment is escrowed in the LeftClaw Services contract on Base until the audit is delivered.
-          Your job — description, stage, and final report — is tracked publicly on-chain.
+          Payment is escrowed in the LeftClaw Services contract on Base, then burned 🔥 — swapped to
+          CLAWD and sent to the dead address, never to a treasury. Your job — description, stage, and
+          final report — is tracked publicly on-chain.
         </p>
       </div>
     </div>
