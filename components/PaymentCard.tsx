@@ -26,6 +26,12 @@ const METHOD_LABELS: Record<Method, { name: string; symbol: string }> = {
   clawd: { name: "CLAWD", symbol: "🦞" },
 };
 
+// The description is stored in contract storage (~22k gas per 32 bytes), and
+// Base enforces the EIP-7825 per-transaction gas cap of 16.7M — past roughly
+// 20kB the post can never fit, at any gas setting. 12kB keeps ample headroom
+// for the swap-and-burn overhead.
+const MAX_DESC_BYTES = 12_000;
+
 export function PaymentCard() {
   const router = useRouter();
   const { address, chainId } = useAccount();
@@ -40,6 +46,8 @@ export function PaymentCard() {
   const [error, setError] = useState<string | null>(null);
 
   const wrongNetwork = !!address && chainId !== BASE_CHAIN_ID;
+  const descBytes = new TextEncoder().encode(description).length;
+  const descTooLong = descBytes > MAX_DESC_BYTES;
 
   // Live price from the LeftClaw contract (USDC 6-decimals; audit = service type 4)
   const { data: serviceType } = useReadContract({
@@ -106,7 +114,14 @@ export function PaymentCard() {
   async function submit() {
     if (!address || !publicClient || wrongNetwork) return;
     if (description.trim().length < 10) {
-      setError("Describe the contract — paste a verified address or the source code (min 10 characters).");
+      setError("Describe the contract — paste a verified address, or a link to the source (min 10 characters).");
+      return;
+    }
+    if (descTooLong) {
+      setError(
+        `Description is ${descBytes.toLocaleString()} bytes — over the ${MAX_DESC_BYTES.toLocaleString()}-byte on-chain limit. ` +
+        "Paste the verified contract address (or a link to the source) instead of the full code.",
+      );
       return;
     }
     setError(null);
@@ -153,6 +168,12 @@ export function PaymentCard() {
       }
 
       const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+      if (receipt.status !== "success") {
+        throw new Error(
+          "The transaction failed on-chain — no payment was taken. If you pasted source code, " +
+          "try the verified contract address (or a link to the source) instead.",
+        );
+      }
       const events = parseEventLogs({ abi: LEFTCLAW_ABI, logs: receipt.logs, eventName: "JobPosted" });
       const jobId = events.length > 0 ? Number(events[0].args.jobId) : null;
       if (jobId === null) throw new Error("Job posted but couldn't read the job ID — check your wallet activity");
@@ -175,7 +196,7 @@ export function PaymentCard() {
   }
 
   const busy = step === "approving" || step === "posting";
-  const canSubmit = !!address && !wrongNetwork && !insufficient && !busy && step !== "done" && description.trim().length >= 10;
+  const canSubmit = !!address && !wrongNetwork && !insufficient && !busy && step !== "done" && description.trim().length >= 10 && !descTooLong;
 
   return (
     <div className="border border-line bg-paper shadow-xl">
@@ -194,11 +215,17 @@ export function PaymentCard() {
           </label>
           <textarea
             className="w-full h-32 border border-line bg-white px-4 py-3 text-sm font-mono focus:outline-none focus:border-ink resize-y"
-            placeholder={"Paste a contract address (verified on Basescan/Etherscan) or the Solidity source.\n\ne.g. 0xAbC… on Base — staking vault, please focus on reentrancy and access control"}
+            placeholder={"Paste a contract address (verified on Basescan/Etherscan) or a link to the source — not the full code.\n\ne.g. 0xAbC… on Base — staking vault, please focus on reentrancy and access control"}
             value={description}
             onChange={e => setDescription(e.target.value)}
             disabled={busy || step === "done"}
           />
+          {descBytes > 4000 && (
+            <p className={`mt-1 text-xs ${descTooLong ? "text-seal" : "text-ink-soft/70"}`}>
+              {descBytes.toLocaleString()} / {MAX_DESC_BYTES.toLocaleString()} bytes (stored on-chain)
+              {descTooLong && " — too long to post. Paste the verified contract address, or a link to the source, instead."}
+            </p>
+          )}
         </div>
 
         <div>

@@ -15,8 +15,10 @@ const SKILL = `# One Dollar Audit — Agent Skill File
 
 ## What you get
 
-Submit a contract address (verified on Basescan/Etherscan) or paste source
-code. You get a written security review: vulnerabilities, logic errors,
+Submit a contract address (verified on Basescan/Etherscan), a link to the
+source, or a short source paste — the description is stored on-chain, so
+keep it under ~12,000 characters (prefer the address for whole codebases).
+You get a written security review: vulnerabilities, logic errors,
 access control issues, gas notes — with severity ratings and fix
 recommendations. Async: the response gives you a \`jobId\`; poll
 \`GET https://onedollaraudit.com/api/jobs/<jobId>\` (JSON) until
@@ -24,7 +26,7 @@ recommendations. Async: the response gives you a \`jobId\`; poll
 
 **Description examples:**
 - \`"0xYourContractAddress on Base — ERC20 with custom transfer logic"\`
-- \`"Audit this Solidity contract: [paste source code]"\`
+- \`"Audit this Solidity contract: [short source paste, under ~12k chars]"\`
 - \`"Security review of our staking contract at 0x… — focus on reentrancy"\`
 
 ---
@@ -165,6 +167,9 @@ concluding the protocol is broken.
 Prefer paying on-chain yourself? Call \`postJobWithUsdc(4, description, 1)\`
 (approve USDC first), \`postJobWithETH(4, description, 1)\` with ~$1 of ETH,
 or \`postJob(4, clawdAmount, description)\` with CLAWD on the job contract.
+The description is written to contract storage — a large one (roughly >20kB)
+cannot fit under Base's 16.7M per-transaction gas cap and will always run out
+of gas. Keep it under ~12kB; pass an address or link for anything bigger.
 
 ---
 

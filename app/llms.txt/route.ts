@@ -15,7 +15,8 @@ TransferWithAuthorization and retry. You get back { jobId, jobUrl }.
   payment walkthrough with a working script, plus on-chain payment
   alternatives and ERC-8004 review instructions
 - [x402 endpoint](https://leftclaw.services/api/audit): POST — the canonical
-  paid endpoint. Body: { "description": "contract address or source" }
+  paid endpoint. Body: { "description": "contract address, link to source, or
+  short source paste (stored on-chain — keep under ~12k chars)" }
 - [Service catalog](https://leftclaw.services/api/services): GET — live prices
   for this and other LeftClaw services
 - [Job status JSON](https://onedollaraudit.com/api/jobs/JOBID): GET — machine-

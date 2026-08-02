@@ -56,9 +56,9 @@ const openapi = {
     title: "One Dollar Audit",
     version: "1.0.0",
     description:
-      "AI smart-contract security audits for $1, paid per request with x402 (USDC on Base, gasless EIP-3009 — no account, no API key). Submit a verified contract address or Solidity source; receive a written security review with severity-rated findings and fix recommendations, delivered on IPFS.",
+      "AI smart-contract security audits for $1, paid per request with x402 (USDC on Base, gasless EIP-3009 — no account, no API key). Submit a verified contract address, a link to the source, or a short source paste; receive a written security review with severity-rated findings and fix recommendations, delivered on IPFS.",
     "x-guidance":
-      "To buy an audit: POST /api/audit with JSON body {\"description\": \"<verified contract address (chain + short context) or pasted Solidity source>\"}. An unpaid call returns HTTP 402 with an x402 v2 challenge in the base64 PAYMENT-REQUIRED response header — sign the quoted $1.00 USDC EIP-3009 authorization (amount \"1000000\" atomic units, Base / eip155:8453, gasless) and retry with the PAYMENT-SIGNATURE request header; @x402/fetch automates the whole exchange. The 200 response contains a jobId — persist it, then poll GET /api/jobs/{jobId} (free, no auth) until status is \"complete\" and fetch reportUrl; or include an optional \"callbackUrl\" in the POST body to have {jobId, status, reportUrl, statusUrl} POSTed to you when the audit finishes. Full agent instructions: https://onedollaraudit.com/skill.md",
+      "To buy an audit: POST /api/audit with JSON body {\"description\": \"<verified contract address (chain + short context), a link to the source, or a short source paste — under 12,000 chars, it is stored on-chain>\"}. An unpaid call returns HTTP 402 with an x402 v2 challenge in the base64 PAYMENT-REQUIRED response header — sign the quoted $1.00 USDC EIP-3009 authorization (amount \"1000000\" atomic units, Base / eip155:8453, gasless) and retry with the PAYMENT-SIGNATURE request header; @x402/fetch automates the whole exchange. The 200 response contains a jobId — persist it, then poll GET /api/jobs/{jobId} (free, no auth) until status is \"complete\" and fetch reportUrl; or include an optional \"callbackUrl\" in the POST body to have {jobId, status, reportUrl, statusUrl} POSTed to you when the audit finishes. Full agent instructions: https://onedollaraudit.com/skill.md",
     contact: {
       name: "One Dollar Audit",
       email: "clawd@buidlguidl.com",
@@ -87,8 +87,9 @@ const openapi = {
                   description: {
                     type: "string",
                     minLength: 10,
+                    maxLength: 12000,
                     description:
-                      "What to audit: a contract address verified on Basescan/Etherscan (include the chain and a line of context) or pasted Solidity source code.",
+                      "What to audit: a contract address verified on Basescan/Etherscan (include the chain and a line of context), a link to the source, or a short Solidity paste. Stored on-chain — keep it under 12,000 characters; use the address or a link for whole codebases.",
                   },
                   context: {
                     type: "string",

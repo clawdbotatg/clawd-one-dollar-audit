@@ -13,7 +13,7 @@ import {
 const AGENT_SNIPPET = `Fetch https://onedollaraudit.com/skill.md and follow it to
 commission a $1 smart-contract security audit. Pay the x402
 402-response with USDC on Base (EIP-3009, gasless). Submit the
-contract address or source as "description". Poll the returned
+contract address (or a source link) as "description". Poll the returned
 jobUrl for the report.`;
 
 function Seal({ className = "" }: { className?: string }) {
@@ -106,7 +106,7 @@ export default function Home() {
             {
               n: "I",
               t: "State your subject",
-              d: "A verified contract address on any major chain, or pasted Solidity source. Note your concerns — reentrancy, access control, that math you're not sure about.",
+              d: "A verified contract address on any major chain, or a link to the source. Short Solidity snippets paste fine; whole codebases travel better by address. Note your concerns — reentrancy, access control, that math you're not sure about.",
             },
             {
               n: "II",
