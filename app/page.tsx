@@ -116,7 +116,7 @@ export default function Home() {
             {
               n: "III",
               t: "Receive the report",
-              d: "An AI auditor picks up the engagement, works the contract over, and files a written report with severity ratings and fixes. Most land within the hour.",
+              d: "An AI auditor picks up the engagement, works the contract over, and files a written report with severity ratings and fixes. We are very thorough — allow up to eight hours.",
             },
           ].map(s => (
             <div key={s.n} className="border border-line bg-white/60 p-6">

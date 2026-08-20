@@ -9,7 +9,7 @@ import { prettyReportLink } from "@/lib/prettyReport";
 const STATUS_SLUG = ["pending", "in_progress", "complete", "declined", "cancelled", "reassigned"] as const;
 
 const POLL_INTERVAL_SECONDS = 30;
-const TYPICAL_COMPLETION_SECONDS = 3600; // "most reports land within the hour"
+const TYPICAL_COMPLETION_SECONDS = 28800; // "we are very thorough — allow up to eight hours" (matches the wrangler's 8h auditor time cap)
 
 const client = createPublicClient({ chain: base, transport: http("https://mainnet.base.org") });
 
@@ -84,7 +84,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       ...(done
         ? {}
         : {
-            // null once past the typical hour — keep polling, don't trust a fake ETA
+            // null once past the typical window — keep polling, don't trust a fake ETA
             estimatedCompletionSeconds: elapsed < TYPICAL_COMPLETION_SECONDS ? TYPICAL_COMPLETION_SECONDS - elapsed : null,
             pollIntervalSeconds: POLL_INTERVAL_SECONDS,
           }),

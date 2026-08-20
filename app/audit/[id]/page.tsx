@@ -142,9 +142,9 @@ export default function AuditTracker({ params }: { params: Promise<{ id: string 
 
               {!completed && job.status <= 1 && (
                 <p className="text-sm text-ink-soft leading-relaxed">
-                  An auditor picks this up automatically — most reports land within the hour. This
-                  page refreshes itself; the engagement number is your receipt, so feel free to
-                  close the tab and come back.
+                  An auditor picks this up automatically. We are very thorough — a full
+                  engagement can take up to eight hours. This page refreshes itself; the
+                  engagement number is your receipt, so feel free to close the tab and come back.
                 </p>
               )}
 

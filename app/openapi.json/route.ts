@@ -38,7 +38,7 @@ const jobStatusSchema = {
     },
     estimatedCompletionSeconds: {
       type: ["integer", "null"],
-      description: "Rough ETA; absent once the job is done, null past the typical hour.",
+      description: "Rough ETA; absent once the job is done, null past the typical 8-hour window.",
     },
     pollIntervalSeconds: { type: "integer", description: "Suggested polling interval." },
     trackUrl: { type: "string", description: "Human tracking page for this job." },

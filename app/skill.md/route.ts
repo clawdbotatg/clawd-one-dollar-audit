@@ -76,7 +76,7 @@ async function main() {
   // unauthenticated and stateless — if this process dies or your session/turn
   // ends, resume with GET /api/jobs/<jobId> later. Never re-pay to re-check.
 
-  // Poll the JSON job API until the report lands (most within the hour)
+  // Poll the JSON job API until the report lands (thorough — allow up to 8 hours)
   for (;;) {
     const job = await (await fetch(\`https://onedollaraudit.com/api/jobs/\${result.jobId}\`)).json();
     if (job.status === "complete") { console.log("Report:", job.reportUrl ?? job.report); break; }
