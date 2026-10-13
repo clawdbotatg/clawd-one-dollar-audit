@@ -32,7 +32,7 @@ const CORS = {
 };
 
 export async function POST(req: Request) {
-  const headers = new Headers();
+  const headers = new Headers({ "x-x402-resource-origin": new URL(req.url).origin });
   for (const name of FORWARD_REQUEST_HEADERS) {
     const value = req.headers.get(name);
     if (value) headers.set(name, value);
